@@ -124,13 +124,15 @@ class PolyfillCrypto extends React.Component {
   }
 
   render() {
-    // The uri 'about:blank' doesn't have access to crypto.subtle on android
-    const uri = "file:///android_asset/blank.html";
-
     // Base64 dance is to work around https://github.com/facebook/react-native/issues/20365
     const code = `((function () {${webViewWorkerString};${internalLibrary}})())`;
     const source = Platform.select({
-      android: { source: { uri } },
+      android: { source: this.props.androidPath
+        // Expo doesn't allow to include custom files into /android_asset
+        ? require(this.props.androidPath)
+        // The uri 'about:blank' doesn't have access to crypto.subtle on android
+        : { uri: "file:///android_asset/blank.html" }
+      },
       ios: undefined
     });
     return (
